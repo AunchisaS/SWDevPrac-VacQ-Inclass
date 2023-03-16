@@ -1,37 +1,55 @@
 const mongoose = require('mongoose');
 
 const HospitalSchema = new mongoose.Schema({
-    name:{
+    name: {
         type: String,
-        required:[true,'Please add a name'],
+        required: [true, 'Please add a name'],
         unique: true,
         trim: true,
-        maxlength:[50,'Name can not be more than 50 characters']
+        maxlength: [50, 'Name can not be more than 50 characters']
     },
-    address:{
+    address: {
         type: String,
-        required: [true,'Please add an address']
+        required: [true, 'Please add an address'],
     },
-    district:{
+    distrinct: {
         type: String,
-        required:  [true,'Please add a district']
+        required: [true, 'Please add a district'],
     },
-    province:{
+    province: {
         type: String,
-        required: [true,'Please add a province']
+        required: [true, 'Please add a province'],
     },
-    postalcode:{
+    postalcode : {
         type: String,
-        required: [true,'Please add a postalcode'],
-        maxlength: [5,'Postal Code can not be more than 5 digits']
+        required: [true, 'Please add a postal code'],
+        maxlength: [5, 'Postal code can not be more than 5 characters']
     },
-    tel:{
-        type: String
-    },
-    region:{
+    tel: {
         type: String,
-        required: [true,'Please add a region']
+    },
+    region: {
+        type: String,
+        required: [true, 'Please add a region'],
     }
+}, {
+    toJSON: {virtuals: true},
+    toObject: {virtuals: true}
 });
 
-module.exports = mongoose.model('Hospital',HospitalSchema);
+// Cascade delete appointments when a hospital is deleted
+HospitalSchema.pre('remove', async function(next) {
+    console.log(`Appointments being removed from hospital ${this._id}`);
+    await this.model('Appointment').deleteMany({hospital: this._id});
+    next();
+});
+
+// Reverse populate with virtuals
+HospitalSchema.virtual('appointments', {
+    ref: 'Appointment',
+    localField: '_id',
+    foreignField: 'hospital',
+    justOne: false
+});
+
+module.exports = mongoose.model('Hospital', HospitalSchema);
