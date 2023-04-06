@@ -12,7 +12,7 @@ const HospitalSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please add an address'],
     },
-    distrinct: {
+    district: {
         type: String,
         required: [true, 'Please add a district'],
     },
